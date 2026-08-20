@@ -1,6 +1,6 @@
 # Website AI Workflow
 
-Версия: v1
+Версия: v1.2
 Назначение: разработка качественных маркетинговых сайтов и лендингов с AI-агентами.
 
 ## Start here
@@ -50,7 +50,95 @@ Visual Direction / Section Design
 
 `PRODUCT.md` и `DESIGN.md` заранее пустыми не создаются. Их формируют соответствующие этапы workflow на основании реальных данных проекта.
 
+### Рабочие окна в Codex
+
+Основное окно проекта — **Website Orchestrator** с нашим будущим skill `website-workflow`.
+
+Оно остается открытым на весь проект и держит только:
+
+- текущий этап workflow;
+- принятые оператором решения;
+- какие артефакты уже готовы;
+- какой specialist нужен следующим;
+- какие gates уже пройдены.
+
+Orchestrator **не занимается тяжелым research, дизайном или production-кодом**. Специализированная работа выносится в отдельные окна или subagents, чтобы не загрязнять основной контекст.
+
+Рекомендуемая схема:
+
+```text
+WINDOW 1 — Website Orchestrator
+живет весь проект
+        |
+        +--> WINDOW 2 — Strategist
+        |    Stage 1A
+        |    затем возвращаемся в ЭТО ЖЕ окно на Stage 2
+        |
+        +--> WINDOW 3 — Design Context
+        |    только Stage 1B
+        |    после завершения можно закрыть
+        |
+        +--> WINDOW 4 — Art Director
+        |    Stage 3 + дизайн всех sections
+        |    держим живым для визуальной консистентности
+        |
+        +--> WINDOW 5 — Frontend Coder
+             implementation всех sections
+             держим живым для технической консистентности
+```
+
+Когда возвращаться в Orchestrator:
+
+- после завершения Stage 1A + 1B;
+- после утверждения `content/page.md`;
+- после утверждения Visual Direction;
+- после завершения крупных gates;
+- после сборки всей страницы перед финальными review.
+
+Во время Section Loop оператор в основном переключается между **Art Director** и **Frontend Coder**. Возвращаться в Orchestrator после каждого мелкого действия не требуется: approved files и состояние репозитория являются source of truth.
+
+#### Где использовать subagents
+
+Subagents используются там, где полезен свежий независимый контекст или где много шумного research:
+
+- Strategist может делегировать read-heavy competitor / SERP research;
+- Art Director может запускать свежий targeted reference-research subagent, если прямого reference для блока нет;
+- в начале Section Loop создается **один persistent section reviewer**, который проверяет последовательные реализованные блоки и видит cross-section inconsistency;
+- если section reviewer начинает повторяться, путаться или drift'овать, он заменяется свежим;
+- Final Page Review выполняет **новый fresh reviewer**, который не участвовал в section reviews;
+- при включенной финальной доводке каждый новый polish-round может использовать свежего critic.
+
+Codex показывает subagent threads отдельно, поэтому при необходимости оператор может открыть и проверить их работу. Основной thread при этом получает только сжатый результат review/research.
+
+### Опциональные настройки проекта
+
+Пока это **не slash-команды и не автоматический parser**, а простые настройки, которые оператор может включить перед проектом или перед соответствующим этапом.
+
+```text
+SEO VERIFIED
+→ Strategist использует DataForSEO
+
+DEEP
+→ больше самостоятельного research / reference exploration
+  только там, где решение действительно неоднозначно
+
+POLISH
+→ после готовой страницы включается bounded reference-driven
+  доводка, максимум 3 круга
+```
+
+`website-workflow` в будущем только хранит выбранные flags и передает их нужному specialist skill.
+
+Сама логика настройки живет в соответствующих skills:
+
+```text
+SEO VERIFIED -> strategist
+DEEP         -> strategist + art-director
+POLISH       -> reviewer + art-director/frontend-coder
+```
+
 ---
+
 
 ## 1. Как устроена система
 
@@ -58,7 +146,8 @@ Visual Direction / Section Design
 
 - `AGENTS.md` - общие правила для агентов, а также правила для типичных типов проектов. Здесь фиксируются стек, структура репозитория, ограничения, ключевые файлы и другие постоянные рабочие условия.
 - `WORKFLOW.md` - инструкция для оператора: в каком порядке вести новый проект, какие этапы проходить и какие результаты получать.
-- `.agents/skills/` и `.codex/agents/` - инструкции для специализированных ролей и повторяемых задач.
+- `website-workflow` skill - машинный оркестратор этого процесса: маршрутизирует этапы, specialists и gates, но сам не выполняет специализированную работу.
+- остальные `.agents/skills/` и `.codex/agents/` - инструкции для специализированных ролей и повторяемых задач.
 
 ### Контекст конкретного проекта
 
@@ -73,15 +162,28 @@ Visual Direction / Section Design
 
 ### Impeccable
 
-Если оператор хочет использовать Impeccable в проекте, установить его в начале проекта из корня репозитория:
+Если оператор хочет использовать Impeccable, установить его **в самом начале нового website-проекта** из корня репозитория и только в project scope:
 
 ```bash
-npx impeccable install
+npx impeccable install --scope=project
 ```
 
-После установки перезапустить / reload используемый AI coding tool.
+После установки перезапустить / reload Codex. Если установлен project hook, открыть `/hooks` в Codex и одобрить его.
 
-Impeccable не является обязательной частью workflow. Он используется как набор инструментов для design context, генерации/итерации, critique, hooks и финальной доводки.
+Impeccable не является обязательной частью workflow. Он используется как дополнительный toolkit для project context, design context, iteration, critique, hooks, audit и polish.
+
+Важно разделять:
+
+```text
+/impeccable init
+→ PRODUCT.md / product context
+
+наш design-context
++ /impeccable document --seed
+→ DESIGN.md / visual context
+```
+
+Не нужно автоматически создавать `DESIGN.md` сразу после установки: визуальная система формируется позже, на Stage 1B после анализа референсов.
 
 `PRODUCT.md` и `DESIGN.md` остаются canonical-файлами нашего workflow.
 
@@ -141,6 +243,18 @@ Impeccable examples/components не используются как случай
 - `PRODUCT.md`
 - `AGENTS.md`
 - папку `references/`
+
+Если Impeccable установлен, после сбора исходных данных запустить:
+
+```text
+/impeccable init
+```
+
+Ответы даются на основании исходных данных проекта. `init` используется для создания / проверки `PRODUCT.md`.
+
+Если в конце `init` предлагает сразу запустить `document`, **отложить этот шаг до Stage 1B**, потому что визуальные решения еще не прошли анализ референсов.
+
+Если Impeccable не используется, `PRODUCT.md` создает базовый агент по тем же исходным данным.
 
 Результат этапа: агент понимает, что мы строим и в каких рамках.
 
@@ -253,14 +367,35 @@ Strategist -> исследует и создает strategy.md
 
 #### Использование Impeccable
 
-Если Impeccable установлен:
+Основным оркестратором Stage 1B остается наш skill `design-context`.
 
-- на новом проекте без сформированной UI-системы можно использовать `/impeccable document --seed` как основу для `DESIGN.md`;
-- если уже существует связный UI, tokens или компоненты, используется `/impeccable document` для синхронизации `DESIGN.md` с реальной реализацией;
-- `/impeccable extract` на этом этапе не нужен — reusable patterns извлекаются позже, когда они действительно появились в нескольких местах;
-- `/impeccable doctor` запускается по необходимости: после установки/обновления, проблем с context/hook или подозрения, что `DESIGN.md` устарел.
+Он сначала:
 
-Основным оркестратором этапа остается наш skill `design-context`; Impeccable используется как дополнительный инструментарий и совместимый формат.
+1. анализирует референсы и существующий visual context;
+2. определяет визуальные принципы, которые действительно подходят проекту;
+3. выявляет пробелы и сообщает о них оператору.
+
+Только после этого, если Impeccable установлен, используется:
+
+```text
+/impeccable document --seed
+```
+
+Выводы `design-context` используются как вход для seed-вопросов Impeccable: color strategy, typography direction, motion, references и anti-references.
+
+Impeccable здесь не придумывает дизайн-систему вместо нас. Он помогает:
+
+- оформить `DESIGN.md` в совместимом структурированном формате;
+- создать `.impeccable/design.json`;
+- дать hooks / detector / Live Mode точный visual context.
+
+После генерации `design-context` проверяет и при необходимости корректирует `DESIGN.md`.
+
+Если Impeccable не установлен, `design-context` создает `DESIGN.md` самостоятельно в совместимой структуре.
+
+`/impeccable extract` на этом этапе не используется.
+
+`/impeccable doctor` запускается только при проблемах с context, hooks или подозрении на устаревшие файлы.
 
 #### Результат
 
@@ -576,7 +711,13 @@ Coder:
 
 #### 5. Independent Review
 
-Отдельный subagent `reviewer` проверяет **реально отрендеренный блок**.
+В начале Section Loop Orchestrator создает **один persistent subagent `reviewer`** и по возможности использует его для последовательной проверки всех sections.
+
+Так reviewer накапливает понимание уже утвержденных блоков и может замечать cross-section inconsistency и повторное изобретение уже решенных patterns.
+
+Если его judgement начинает drift'овать, он повторяет старые findings или путает текущий блок с предыдущим, reviewer заменяется свежим.
+
+Reviewer проверяет **реально отрендеренный блок**.
 
 Reviewer смотрит только полезные вещи:
 
@@ -603,7 +744,9 @@ Coder / Art Director исправляют только существенные 
 
 `/impeccable polish` запускается только когда композиция, контент и реализация блока уже закончены. Черновые mockups не полируются.
 
-Обычно достаточно одного review/fix прохода. Второй круг в первую очередь проверяет уже исправленные замечания.
+Обычно достаточно одного review/fix прохода.
+
+Если после fixes нужен re-review, reviewer проверяет **исправленные findings и diff этих исправлений**, а не запускает полный review блока заново. Новые проблемы поднимаются только если они появились непосредственно из внесенного fix.
 
 Если проблема находится в самом approved mockup, Reviewer сообщает об этом оператору и Art Director вместо скрытого redesign.
 
@@ -615,6 +758,16 @@ Coder / Art Director исправляют только существенные 
 - либо дает последние точечные правки.
 
 Только после operator approve section считается завершенным и начинается следующий блок.
+
+Когда в production-коде уже появился достаточно полный visual system (обычно после нескольких representative sections: реальные colors, typography, buttons и основные component patterns), при установленном Impeccable **один раз** запускается:
+
+```text
+/impeccable document
+```
+
+Он синхронизирует seed `DESIGN.md` с реально реализованной системой и обновляет `.impeccable/design.json`.
+
+Это не новый дизайн-этап и не повод переосмысливать утвержденный стиль. Цель — привести документацию и detector context в соответствие с реальным кодом.
 
 Цикл:
 
@@ -642,9 +795,11 @@ next section
 
 ### Этап 5. Final Page Review
 
-Роль: независимый subagent `reviewer`
+Роль: **fresh независимый subagent `reviewer`**
 
 Режим skill: `whole-page`
+
+Persistent section reviewer на этом этапе не используется как основной судья. Создается новый reviewer с чистым контекстом, который впервые видит страницу целиком.
 
 Этап запускается после того, как все блоки собраны и каждый отдельно утвержден оператором.
 
@@ -673,15 +828,54 @@ Reviewer использует:
 
 Reviewer формирует только конкретные существенные findings и не редактирует application code.
 
-Coder / Art Director исправляют найденные проблемы. Если требуется финальная полировка, `/impeccable polish` используется только после того, как структура всей страницы уже окончательно утверждена.
+Coder / Art Director исправляют найденные проблемы.
 
-Обычно достаточно одного review/fix прохода.
+Обычный Final Page Review ограничивается одним review/fix проходом. Повторная проверка должна быть scoped к исправленным findings.
+
+#### Optional POLISH
+
+Если оператор включил настройку `POLISH`, после обычного Final Page Review запускается отдельная bounded доводка.
+
+POLISH работает только при наличии внешнего comparable:
+
+- reference URL;
+- reference screenshot;
+- approved visual direction / section reference;
+- другой явный эталон, выбранный оператором.
+
+Без подходящего reference polish-loop не запускается: critic не должен сам придумывать стандарт качества.
+
+Один круг:
+
+```text
+fresh critic
+    ↓
+live page vs reference
+    ↓
+конкретные проверяемые различия
+    ↓
+filter существенных findings
+    ↓
+Art Director / Coder fixes
+    ↓
+scoped verification
+```
+
+Остановка по первому условию:
+
+1. новый круг не нашел существенных различий;
+2. выполнено 3 круга;
+3. оператор остановил доводку.
+
+Если целый polish-round ухудшил уже утвержденный результат или сломал working behavior, изменения этого круга откатываются вместо запуска нового цикла ремонта.
+
+Impeccable `critique`, `audit` и `polish` можно использовать внутри этого процесса, но reference остается главным внешним критерием.
 
 ---
 
 ### Этап 6. Final SEO / Technical Pass
 
-Роль: тот же независимый subagent `reviewer`
+Роль: fresh final `reviewer` из Stage 5 либо новый независимый reviewer, если требуется максимально чистый technical pass.
 
 Режим skill: `seo-tech`
 
@@ -813,7 +1007,9 @@ FOR EACH SECTION:
    ↓
 next section
    ↓
-Final Page Review
+fresh Final Page Reviewer
+   ↓
+[POLISH enabled? -> reference-driven loop, max 3]
    ↓
 SEO / Technical Pass
    ↓
