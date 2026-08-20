@@ -1,0 +1,7 @@
+interface:
+  display_name: "Website Art Director"
+  short_description: "Visual direction and section-level website design"
+  default_prompt: "Use $art-director to continue the website Art Director work in the explicitly requested mode."
+
+policy:
+  allow_implicit_invocation: false
