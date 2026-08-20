@@ -1,0 +1,7 @@
+interface:
+  display_name: "Website Strategist"
+  short_description: "SEO, funnel, strategy, and final website content"
+  default_prompt: "Continue the website Strategist work in the explicitly requested mode."
+
+policy:
+  allow_implicit_invocation: false
