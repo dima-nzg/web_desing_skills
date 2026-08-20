@@ -669,7 +669,7 @@ Impeccable critique
 Impeccable detector / read-only audit where possible
 ```
 
-Другие website role-skills и ненужные MCP явно отключаются через `skills.config` / MCP allowlists, потому что omitted settings наследуются от parent.
+В v1 изоляция опирается на explicit invocation, `allow_implicit_invocation: false`, узкие descriptions, custom-agent `developer_instructions` и явный `sandbox_mode`. Hard `skills.config` / MCP allowlists откладываются, пока portable paths и реальные MCP identities не подтверждены; omitted settings наследуются от parent.
 
 #### `technical-reviewer`
 
@@ -913,7 +913,7 @@ Application-code writes:
 
 `technical-reviewer` используется на SEO / Technical Pass.
 
-Оба custom agent config должны явно задавать собственные `sandbox_mode`, `skills.config` и MCP allowlists, чтобы не наследовать лишние capabilities от parent.
+Оба custom agent config явно задают собственный `sandbox_mode` и узкие `developer_instructions`. Hard `skills.config` и MCP allowlists добавляются только после подтверждения portable paths и стабильных MCP identities; до этого omitted settings наследуются от parent.
 
 ---
 
@@ -1089,8 +1089,9 @@ Skill Builder не имеет права самостоятельно менят
 6. frontend-coder
 
 7. project .codex/config.toml
-   + skill isolation
-   + MCP/tool allowlists
+   + custom-agent sandbox isolation
+   + explicit skill invocation / implicit-off
+   + MCP/skills hard allowlists only when portable identities/paths are verified
 
 8. smoke-test disposable website repo
 
