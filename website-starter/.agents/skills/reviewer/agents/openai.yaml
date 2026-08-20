@@ -1,0 +1,7 @@
+interface:
+  display_name: "Website Reviewer"
+  short_description: "Independent review for approved website work"
+  default_prompt: "Review the supplied website work in the explicitly requested reviewer mode."
+
+policy:
+  allow_implicit_invocation: false
