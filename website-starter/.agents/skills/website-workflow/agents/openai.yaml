@@ -1,0 +1,7 @@
+interface:
+  display_name: "Website Workflow"
+  short_description: "Operator workflow orchestrator for website projects"
+  default_prompt: "Run or resume this website project from its current workflow state."
+
+policy:
+  allow_implicit_invocation: false
