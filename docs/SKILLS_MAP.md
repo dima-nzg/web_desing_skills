@@ -46,7 +46,7 @@ State хранит **только крупное состояние workflow**, 
 stage: init
 
 settings:
-  seo_verified: false
+  seo_mode: free
   deep: false
   polish: false
 
@@ -67,6 +67,13 @@ section_loop:
   status: pending
 
 blockers: []
+```
+
+Допустимые значения `settings.seo_mode`:
+
+```text
+free
+verified
 ```
 
 Fine-grained source of truth для секций:
