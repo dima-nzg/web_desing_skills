@@ -1,0 +1,7 @@
+interface:
+  display_name: "Website Frontend Coder"
+  short_description: "Implement approved website sections in production"
+  default_prompt: "Use $frontend-coder to implement or refine the currently approved website section."
+
+policy:
+  allow_implicit_invocation: false
