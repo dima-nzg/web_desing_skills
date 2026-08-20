@@ -1,0 +1,7 @@
+interface:
+  display_name: "Website Design Context"
+  short_description: "Extract the initial design system from project references"
+  default_prompt: "Analyze the supplied website references and create or resume the Stage 1B design context."
+
+policy:
+  allow_implicit_invocation: false
