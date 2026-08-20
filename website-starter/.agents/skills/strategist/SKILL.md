@@ -120,7 +120,19 @@ When a useful claim cannot be confirmed, mark it as an operator/content gap inst
 
 ## Operator interaction
 
-Ask only questions that materially change the product, strategy, SEO target, or copy.
+Before operator intake, read `.agents/OPERATOR_INTAKE.md`.
+
+Strategy mode:
+
+- read `PRODUCT.md` and `references/` first;
+- maximum 3 initial operator questions;
+- ask only decisions that materially affect strategy, SEO, or funnel and are not discoverable by research.
+
+Content mode:
+
+- ask once at the beginning whether the operator has additional copy, tone, or content-structure references;
+- after that, operator interaction is selection, combination, or correction of section variants, not repeated intake;
+- do not ask the same project facts again.
 
 Discoverable facts belong to research, not questions.
 

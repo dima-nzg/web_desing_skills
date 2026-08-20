@@ -12,7 +12,9 @@ Website workflow существует только внутри website-project.
 website-starter/
 ├─ AGENTS.md
 ├─ WORKFLOW.md
+├─ OPERATOR_RUNBOOK.md
 ├─ .agents/
+│  ├─ OPERATOR_INTAKE.md
 │  └─ skills/
 ├─ .codex/
 │  ├─ agents/
@@ -87,6 +89,26 @@ design/approved-sections/
 Когда Orchestrator снова получает управление, он сверяет эти artifacts и обновляет major state.
 
 Цель: после закрытия окна или compaction Orchestrator восстанавливает маршрут проекта из одного маленького файла, не пытаясь вести параллельный task tracker.
+
+## 2.1 Shared operator UX protocol
+
+`OPERATOR_RUNBOOK.md` содержит короткие copy/paste launch prompts для правильных окон и explicit skill modes. Он не заменяет canonical порядок stages и gates из `WORKFLOW.md`.
+
+`.agents/OPERATOR_INTAKE.md` — общий voice-friendly protocol вопросов оператору, а не runtime role, agent, stage или artifact owner.
+
+Его используют все operator-facing main skills:
+
+```text
+website-workflow
+strategist
+design-context
+art-director
+frontend-coder
+```
+
+Каждая роль сначала читает доступные canonical artifacts и project context, сообщает уже найденное, затем задает одной компактной пачкой только недостающие вопросы в пределах своего budget. Resume не перезапускает intake с нуля.
+
+Research subagents и reviewers по-прежнему запускаются их parent roles; operator runbook не превращает их в ручные рабочие окна и не меняет isolation/ownership architecture.
 
 
 ---

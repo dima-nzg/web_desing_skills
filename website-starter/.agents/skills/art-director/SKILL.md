@@ -76,6 +76,23 @@ If design requires a substantive copy change:
 2. route it to operator/Strategist;
 3. wait for `content/page.md` to be updated before treating the new copy as approved.
 
+## Operator intake
+
+Before operator questions, read `.agents/OPERATOR_INTAKE.md` and all relevant approved artifacts.
+
+Visual Direction:
+
+- maximum 2 initial operator questions;
+- ask only for material reference/fidelity choices that are not already known.
+
+Section mode:
+
+- default to one operator decision: specific reference plus `CLOSE`, `ADAPT`, or `INSPIRE`, only when not already known;
+- if no reference exists, do targeted research instead of asking the operator to research;
+- precise real-asset requests after composition approval are allowed when genuinely required.
+
+Do not reopen already approved decisions.
+
 ## Block-start operator check
 
 At the start of every block you actually design, establish:

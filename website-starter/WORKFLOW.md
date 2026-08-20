@@ -15,11 +15,15 @@
 5. Проходит WORKFLOW.md сверху вниз
 ```
 
+Для практического запуска каждого окна используй `OPERATOR_RUNBOOK.md`.
+Он не заменяет `WORKFLOW.md`: runbook содержит короткие launch-prompts, а `WORKFLOW.md` остается canonical описанием stages, gates и outputs.
+
 На старте в проекте уже есть только фундамент:
 
 ```text
 AGENTS.md
 WORKFLOW.md
+OPERATOR_RUNBOOK.md
 .agents/skills/
 .codex/agents/
 .codex/config.toml
@@ -52,7 +56,7 @@ Visual Direction / Section Design
 
 ### Рабочие окна в Codex
 
-Основное окно проекта — **Website Orchestrator** с нашим будущим skill `website-workflow`.
+Основное окно проекта — **Website Orchestrator** с существующим skill `website-workflow`.
 
 Оно остается открытым на весь проект и держит только:
 
@@ -103,7 +107,7 @@ Subagents используются там, где полезен свежий н
 
 - Strategist может делегировать read-heavy competitor / SERP research;
 - Art Director может запускать свежий targeted reference-research subagent, если прямого reference для блока нет;
-- в начале Section Loop создается **один persistent section reviewer**, который проверяет последовательные реализованные блоки и видит cross-section inconsistency;
+- Frontend Coder в начале независимого review создает или переиспользует **один persistent `visual-reviewer`**, который проверяет последовательные реализованные блоки и видит cross-section inconsistency;
 - если section reviewer начинает повторяться, путаться или drift'овать, он заменяется свежим;
 - Final Page Review выполняет **новый fresh reviewer**, который не участвовал в section reviews;
 - при включенной финальной доводке каждый новый polish-round может использовать свежего critic.
@@ -127,7 +131,7 @@ POLISH
   доводка, максимум 3 круга
 ```
 
-`website-workflow` в будущем только хранит выбранные flags и передает их нужному specialist skill.
+`website-workflow` хранит выбранные flags в `.website/state.md` и передает их нужному specialist skill.
 
 Сама логика настройки живет в соответствующих skills:
 
@@ -220,6 +224,14 @@ Impeccable examples/components не используются как случай
 
 ### Этап 0. Инициализация проекта
 
+#### Operator quick action
+
+Window: Website Orchestrator
+Invoke: `$website-workflow`
+Launch prompt: `OPERATOR_RUNBOOK.md -> 0. Start Project`
+
+Orchestrator first reads existing project context and then asks one compact voice-friendly batch for missing inputs according to `.agents/OPERATOR_INTAKE.md`.
+
 Собрать исходные данные:
 
 - что за продукт;
@@ -241,8 +253,9 @@ Impeccable examples/components не используются как случай
 Создать или обновить:
 
 - `PRODUCT.md`
-- `AGENTS.md`
-- папку `references/`
+- папку `references/` по мере необходимости
+
+Существующий starter `AGENTS.md` корректируется только при наличии project-specific правил; по умолчанию он не пересоздается.
 
 Если Impeccable установлен, после сбора исходных данных запустить:
 
@@ -261,6 +274,14 @@ Impeccable examples/components не используются как случай
 ---
 
 ### Этап 1A. Strategy / SEO / Funnel
+
+#### Operator quick action
+
+Window: Strategist
+Invoke: `$strategist`, mode `strategy`
+Launch prompt: `OPERATOR_RUNBOOK.md -> 1A`
+
+Strategist reads `PRODUCT.md` and `references/` first and asks only missing operator decisions, normally no more than 3.
 
 Роль: `strategist`
 
@@ -336,6 +357,14 @@ Strategist -> исследует и создает strategy.md
 ---
 
 ### Этап 1B. Design Context
+
+#### Operator quick action
+
+Window: Design Context
+Invoke: `$design-context`
+Launch prompt: `OPERATOR_RUNBOOK.md -> 1B`
+
+Design Context first reports what references/materials it found, then asks only unresolved role, priority, fidelity, or material visual questions, normally no more than 3.
 
 Роль: `design-context`
 
@@ -418,9 +447,19 @@ Design Context -> исследует и создает DESIGN.md
 
 После завершения 1A и 1B оператор **одним проходом** проверяет `content/strategy.md` + `DESIGN.md`, корректирует спорные места и только после этого запускает Stage 2.
 
+Практический prompt: `OPERATOR_RUNBOOK.md -> Joint Gate after 1A + 1B`.
+
 ---
 
 ### Этап 2. Content Wireframe
+
+#### Operator quick action
+
+Window: same Strategist window
+Invoke: `$strategist`, mode `content`
+Launch prompt: `OPERATOR_RUNBOOK.md -> 2`
+
+One initial question about extra copy, tone, or content references; after that operator interaction is section variant choice rather than repeated intake.
 
 Роль: `strategist`
 
@@ -478,7 +517,7 @@ Research по ключам, конкурентам и SERP не запускае
 
 Основные headings, тезисы, CTA и структура после этого этапа считаются практически финальными.
 
-На поздних этапах допускается только небольшая полировка формулировок, если этого требует дизайн, readability или финальная SEO-проверка.
+На поздних этапах можно предложить небольшую полировку формулировок, но любое substantive copy-изменение сначала проходит через Strategist и обновленный `content/page.md`. Art Director, Coder и final SEO reviewer не меняют canonical copy молча.
 
 #### Результат
 
@@ -501,6 +540,8 @@ Research по ключам, конкурентам и SERP не запускае
 
 ### Gate 1
 
+Практический prompt: `OPERATOR_RUNBOOK.md -> Gate after Content`.
+
 Оператор подтверждает:
 
 - порядок блоков;
@@ -514,6 +555,14 @@ Research по ключам, конкурентам и SERP не запускае
 ---
 
 ### Этап 3. Visual Direction
+
+#### Operator quick action
+
+Window: Art Director
+Invoke: `$art-director`, mode `visual-direction`
+Launch prompt: `OPERATOR_RUNBOOK.md -> 3`
+
+Art Director reads approved artifacts first and asks only missing material reference/fidelity decisions, normally no more than 2.
 
 Роль: `art-director`
 
@@ -583,7 +632,7 @@ Impeccable не используется как primary reference library и н�
 
 Exploration-код может быть временным и не обязан сразу соответствовать production-качеству.
 
-Если Impeccable установлен, Art Director может использовать его команды и Live Mode для создания и итерации вариантов, но использование конкретной команды не является обязательным.
+Если Impeccable установлен, Art Director может использовать targeted commands. Live Mode опционален для уже отрендеренных или существующих элементов; greenfield visual direction не должен зависеть от Live Mode.
 
 #### Выбор оператора
 
@@ -613,6 +662,8 @@ Approved direction становится визуальным source of truth д�
 
 ### Gate 2
 
+Практический prompt: `OPERATOR_RUNBOOK.md -> Gate after Visual Direction`.
+
 Общий visual direction утвержден.
 
 После этого начинается повторяемый Section Loop.
@@ -625,15 +676,24 @@ Approved direction становится визуальным source of truth д�
 
 - `art-director`
 - `frontend-coder`
-- независимый subagent `reviewer`
+- независимый custom agent `visual-reviewer`
 
 Цель: пройти каждый блок от mockup до реального утвержденного section и только после этого переходить к следующему.
+
+Operator sequence per section:
+
+1. Art Director window -> `OPERATOR_RUNBOOK.md -> 4A`
+2. Operator selects/approves composition and supplies a real asset only if requested
+3. Frontend Coder window -> `OPERATOR_RUNBOOK.md -> 4B`
+4. Coder self-checks and invokes reviewer automatically
+5. Operator checks live implementation -> approve or one focused correction batch
+6. Return to Art Director for the next section
 
 Блоки, уже утвержденные в Stage 3, начинают цикл сразу с `Asset & Responsive Check`.
 
 #### 1. Reference check
 
-Перед новым блоком Art Director спрашивает оператора:
+Перед новым блоком Art Director спрашивает оператора только если reference/fidelity decision еще не зафиксирован:
 
 ```text
 Есть ли конкретный reference для этого блока?
@@ -711,7 +771,9 @@ Coder:
 
 #### 5. Independent Review
 
-В начале Section Loop Orchestrator создает **один persistent subagent `reviewer`** и по возможности использует его для последовательной проверки всех sections.
+Frontend Coder создает и по возможности переиспользует **один persistent custom agent `visual-reviewer`** для последовательной проверки реализованных sections. Orchestrator не владеет этим persistent reviewer relationship, а оператор не запускает reviewer вручную.
+
+`visual-reviewer` явно использует skill `$reviewer` в режиме `section` и никогда не редактирует application source.
 
 Так reviewer накапливает понимание уже утвержденных блоков и может замечать cross-section inconsistency и повторное изобретение уже решенных patterns.
 
@@ -794,6 +856,13 @@ next section
 ---
 
 ### Этап 5. Final Page Review
+
+#### Operator quick action
+
+Window: Website Orchestrator
+Launch prompt: `OPERATOR_RUNBOOK.md -> 5. Final Workflow`
+
+Orchestrator automatically routes the fresh visual and technical reviewers required by the final workflow.
 
 Роль: **fresh независимый subagent `reviewer`**
 
@@ -901,7 +970,7 @@ Reviewer сверяет live page и код с:
 - console / layout / interaction errors;
 - корректность CTA, download links, forms и основных пользовательских действий.
 
-DataForSEO на этом этапе обычно не нужен: keyword strategy уже утверждена раньше. Повторный внешний SEO research запускается только если обнаружилось существенное расхождение с первоначальной стратегией.
+DataForSEO на этом этапе обычно не нужен: keyword strategy уже утверждена раньше. Final SEO/technical reviewer не перезапускает broad keyword/SERP research; существенный конфликт со Strategy возвращается Strategist/operator как отдельное решение.
 
 #### Инструменты
 

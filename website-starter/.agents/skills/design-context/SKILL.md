@@ -49,6 +49,22 @@ existing CSS/tokens/components
 
 If `PRODUCT.md` is missing, return `BLOCKED` and route back to Stage 0.
 
+## Operator intake
+
+Before asking the operator anything, read `.agents/OPERATOR_INTAKE.md`.
+
+First inspect `PRODUCT.md`, `references/`, existing UI, and brand materials.
+
+Before questions, briefly tell the operator what relevant references/materials were found.
+
+Ask at most 3 initial questions, limited to:
+
+- unresolved reference roles/priorities;
+- fidelity or what must be preserved when not already specified;
+- material visual gaps that cannot be derived from available evidence.
+
+Do not ask the operator to manually provide tokens or visual properties you can extract yourself.
+
 ## Reference contract
 
 Before analysis, establish what each reference is for.

@@ -58,6 +58,25 @@ Do not rely on implicit skill activation for role changes.
 
 If a required skill or custom reviewer agent is missing, report the missing dependency instead of simulating that role inside the orchestrator.
 
+## Operator intake
+
+Before asking the operator for project information or a gate decision, read `.agents/OPERATOR_INTAKE.md` and follow it.
+
+Stage 0:
+
+- read existing repo/context first;
+- gather missing project inputs in one compact batch;
+- maximum 5 top-level questions;
+- group related fields instead of reading the Stage 0 checklist as a form.
+
+Later stages:
+
+- do not restart intake;
+- ask only concrete human-gate decisions, tooling choices or blockers;
+- at a gate, tell the operator exactly what to review and what happens after approval.
+
+Do not perform specialist work while trying to reduce questions.
+
 ## Progressive disclosure
 
 Read only the phase file for the current stage.

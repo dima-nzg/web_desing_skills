@@ -46,6 +46,23 @@ previous implemented sections
 project run/build/test instructions
 ```
 
+## Operator intake
+
+Before asking the operator anything, read `.agents/OPERATOR_INTAKE.md`, the Art Director handoff, and canonical project files.
+
+Default question budget: 0.
+
+If the approved source, copy, assets, and responsive intent are sufficient, proceed without asking for confirmation.
+
+Ask the operator only for a real blocker that:
+
+- cannot be resolved from the repo;
+- cannot be resolved inside Coder authority;
+- requires operator input rather than another specialist.
+
+Do not ask the operator to choose implementation details the Coder should decide.
+Do not use questions as a substitute for routing Art Direction or copy issues to their owners.
+
 ## Required handoff
 
 Before implementation, confirm the Art Director handoff contains enough information:
