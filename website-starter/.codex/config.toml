@@ -1,7 +1,8 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-# Portable project-scoped Codex settings for website projects.
-# Keep model selection inherited from the active Codex session.
+# AGENTS.md is intentionally detailed and contains project-specific Web3 rules.
+# Current file is ~45 KB UTF-8, so raise Codex project instruction budget above the 32 KiB default.
+project_doc_max_bytes = 65536
 
 [agents]
 enabled = true
